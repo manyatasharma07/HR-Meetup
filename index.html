@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,24 +6,31 @@
 <title>HR Meetup Poster Maker</title>
 
 <style>
+
 * {
     box-sizing: border-box;
 }
 
+html,
 body {
     margin: 0;
-    padding: 25px;
+    padding: 0;
     font-family: Arial, sans-serif;
     background: #f3f5f9;
 }
 
+body {
+    padding: 25px;
+}
+
 .container {
+    width: 100%;
     max-width: 650px;
-    margin: auto;
+    margin: 0 auto;
 }
 
 .controls {
-    background: white;
+    background: #ffffff;
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 20px;
@@ -33,6 +39,7 @@ body {
 .controls input,
 .controls textarea,
 .controls button {
+    display: block;
     width: 100%;
     margin-top: 10px;
     padding: 12px;
@@ -41,7 +48,7 @@ body {
 
 .controls button {
     background: #4285f4;
-    color: white;
+    color: #ffffff;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -51,15 +58,22 @@ body {
     position: relative;
     width: 100%;
     aspect-ratio: 1080 / 1350;
+    margin: 0 auto;
+    padding: 0;
     overflow: hidden;
-    background: white;
+    background: #ffffff;
+    border: none;
+    box-shadow: none;
 }
 
 .template {
     position: absolute;
+    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
-    inset: 0;
+    object-fit: fill;
+    z-index: 1;
 }
 
 .speaker-photo {
@@ -71,6 +85,7 @@ body {
     object-fit: cover;
     border-radius: 12%;
     display: none;
+    z-index: 2;
 }
 
 .speaker-info {
@@ -87,32 +102,47 @@ body {
     padding: 12px 20px;
     overflow: hidden;
     color: #183153;
+    z-index: 3;
 }
 
 .speaker-name {
+    margin: 0 0 8px;
     font-size: clamp(12px, 3.1vw, 28px);
     font-weight: 700;
-    margin: 0 0 8px;
+    line-height: 1.2;
 }
 
 .speaker-bio {
+    margin: 0;
     font-size: clamp(9px, 1.7vw, 16px);
     line-height: 1.35;
-    margin: 0;
 }
 
+/* PRINT SETTINGS */
 
 @page {
-    size: A4 portrait;
+    size: 108mm 135mm;
     margin: 0;
 }
 
 @media print {
     html,
     body {
+        width: 108mm !important;
+        height: 135mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: white !important;
+        overflow: hidden !important;
+        background: #ffffff !important;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    #poster,
+    #poster * {
+        visibility: visible;
     }
 
     .controls {
@@ -120,21 +150,93 @@ body {
     }
 
     .container {
-        width: 100% !important;
+        position: static !important;
+        width: 108mm !important;
         max-width: none !important;
+        height: 135mm !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    .poster {
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 1080 / 1350;
+    #poster {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 108mm !important;
+        height: 135mm !important;
+        max-width: none !important;
+        aspect-ratio: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
         break-inside: avoid;
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    #poster .template {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: fill !important;
     }
 }
+
+/* PRINT SETTINGS */
+
+
+
+@page {
+    size: 108mm 144.9mm;
+    margin: 0;
+}
+
+
+@media print {
+
+html,
+body {
+    width: 108mm !important;
+    height: 144.9mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+}
+
+.container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 108mm !important;
+    height: 144.9mm !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#poster {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 108mm !important;
+    height: 144.9mm !important;
+    max-width: none !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+}
+}
+
 
 </style>
 </head>
@@ -156,7 +258,7 @@ body {
         <textarea id="bioInput" rows="3"
                   placeholder="Designation, company or short bio"></textarea>
 
-        <button onclick="window.print()">Download Poster / Save as PDF</button>
+       <button type="button" id="downloadBtn">Download Poster (PNG)</button>
     </div>
 
     <div class="poster" id="poster">
@@ -174,25 +276,158 @@ body {
 
 <script>
 const photoInput = document.getElementById("photoInput");
-const speakerPhoto = document.getElementById("speakerPhoto");
+const photo = document.getElementById("speakerPhoto");
 const nameInput = document.getElementById("nameInput");
 const bioInput = document.getElementById("bioInput");
+const speakerName = document.getElementById("speakerName");
+const speakerBio = document.getElementById("speakerBio");
+let speakerPhotoURL = "";
 
-photoInput.addEventListener("change", function () {
-    const file = this.files[0];
+nameInput.addEventListener("input", () => {
+    speakerName.textContent = nameInput.value;
+});
 
-    if (file && file.type.startsWith("image/")) {
-        speakerPhoto.src = URL.createObjectURL(file);
-        speakerPhoto.style.display = "block";
+bioInput.addEventListener("input", () => {
+    speakerBio.textContent = bioInput.value;
+});
+
+photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+
+    if (speakerPhotoURL) URL.revokeObjectURL(speakerPhotoURL);
+    speakerPhotoURL = URL.createObjectURL(file);
+    photo.src = speakerPhotoURL;
+    photo.style.display = "block";
+});
+
+document.getElementById("downloadBtn").addEventListener("click", async function () {
+    const button = this;
+    button.disabled = true;
+    button.textContent = "Preparing PNG...";
+
+    try {
+        const poster = document.getElementById("poster");
+        const photo = document.getElementById("speakerPhoto");
+        const name = document.getElementById("speakerName");
+        const bio = document.getElementById("speakerBio");
+
+        const templateImage = document.querySelector(".template");
+        if (!templateImage.complete || !templateImage.naturalWidth) {
+            await new Promise((resolve, reject) => {
+                templateImage.onload = resolve;
+                templateImage.onerror = () => reject(new Error("Template image failed to load."));
+            });
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 1080;
+        canvas.height = 1449;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(templateImage, 0, 0, 1080, 1449);
+
+        const rect = poster.getBoundingClientRect();
+        const scaleX = 1080 / rect.width;
+        const scaleY = 1449 / rect.height;
+
+        if (getComputedStyle(photo).display !== "none" && photo.complete && photo.naturalWidth) {
+            const photoImage = photo;
+
+            const r = photo.getBoundingClientRect();
+            const x = (r.left - rect.left) * scaleX;
+            const y = (r.top - rect.top) * scaleY;
+            const w = r.width * scaleX;
+            const h = r.height * scaleY;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, Math.min(w, h) * 0.12);
+            ctx.clip();
+
+            const imageRatio = photoImage.naturalWidth / photoImage.naturalHeight;
+            const boxRatio = w / h;
+            let sx = 0, sy = 0;
+            let sw = photoImage.naturalWidth;
+            let sh = photoImage.naturalHeight;
+
+            if (imageRatio > boxRatio) {
+                sw = photoImage.naturalHeight * boxRatio;
+                sx = (photoImage.naturalWidth - sw) / 2;
+            } else {
+                sh = photoImage.naturalWidth / boxRatio;
+                sy = (photoImage.naturalHeight - sh) / 2;
+            }
+
+            ctx.drawImage(photoImage, sx, sy, sw, sh, x, y, w, h);
+            ctx.restore();
+        }
+
+        const info = document.querySelector(".speaker-info");
+        const infoRect = info.getBoundingClientRect();
+        const centerX = (infoRect.left - rect.left + infoRect.width / 2) * scaleX;
+        const centerY = (infoRect.top - rect.top + infoRect.height / 2) * scaleY;
+        const maxWidth = infoRect.width * scaleX - 40;
+        const nameStyle = getComputedStyle(name);
+        const bioStyle = getComputedStyle(bio);
+
+        function drawText(text, style, y, bold) {
+            if (!text.trim()) return;
+
+            const fontSize = parseFloat(style.fontSize) * scaleX;
+            const lineHeight = fontSize * (bold ? 1.2 : 1.35);
+            ctx.font = `${bold ? "700" : style.fontWeight} ${fontSize}px ${style.fontFamily}`;
+            ctx.fillStyle = style.color;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const lines = [];
+            text.split("\n").forEach(paragraph => {
+                let line = "";
+                paragraph.split(/\s+/).forEach(word => {
+                    const test = line ? line + " " + word : word;
+                    if (ctx.measureText(test).width > maxWidth && line) {
+                        lines.push(line);
+                        line = word;
+                    } else {
+                        line = test;
+                    }
+                });
+                if (line) lines.push(line);
+            });
+
+            lines.forEach((line, i) => {
+                ctx.fillText(line, centerX, y + (i - (lines.length - 1) / 2) * lineHeight, maxWidth);
+            });
+        }
+
+        const nameHeight = name.getBoundingClientRect().height * scaleY;
+        const bioHeight = bio.getBoundingClientRect().height * scaleY;
+        const gap = name.textContent.trim() && bio.textContent.trim() ? 8 * scaleY : 0;
+        const totalHeight = nameHeight + bioHeight + gap;
+        let y = centerY - totalHeight / 2;
+
+        drawText(name.textContent, nameStyle, y + nameHeight / 2, true);
+        y += nameHeight + gap;
+        drawText(bio.textContent, bioStyle, y + bioHeight / 2, false);
+
+        const png = await new Promise((resolve, reject) => {
+            canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("PNG creation failed.")), "image/png");
+        });
+
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(png);
+        link.href = url;
+        link.download = "HR-Meetup-Poster.png";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+    } catch (error) {
+        alert("PNG export failed: " + error.message);
+        console.error(error);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Download Poster (PNG)";
     }
-});
-
-nameInput.addEventListener("input", function () {
-    document.getElementById("speakerName").textContent = this.value;
-});
-
-bioInput.addEventListener("input", function () {
-    document.getElementById("speakerBio").textContent = this.value;
 });
 </script>
 </body>
