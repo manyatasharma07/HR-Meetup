@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Meetup Poster Maker</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 25px;
+    font-family: Arial, sans-serif;
+    background: #f3f5f9;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+}
+
+.controls {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.controls input,
+.controls textarea,
+.controls button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 15px;
+}
+
+.controls button {
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.poster {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1080 / 1350;
+    overflow: hidden;
+    background: white;
+}
+
+.template {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+}
+
+.speaker-photo {
+    position: absolute;
+    left: 32.7%;
+    top: 34.8%;
+    width: 34.6%;
+    height: 29.6%;
+    object-fit: cover;
+    border-radius: 12%;
+    display: none;
+}
+
+.speaker-info {
+    position: absolute;
+    left: 20.4%;
+    top: 66.7%;
+    width: 59.3%;
+    height: 12%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 20px;
+    overflow: hidden;
+    color: #183153;
+}
+
+.speaker-name {
+    font-size: clamp(12px, 3.1vw, 28px);
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.speaker-bio {
+    font-size: clamp(9px, 1.7vw, 16px);
+    line-height: 1.35;
+    margin: 0;
+}
+
+
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+
+@media print {
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+    }
+
+    .controls {
+        display: none !important;
+    }
+
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .poster {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1080 / 1350;
+        break-inside: avoid;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="controls">
+        <h2>Customize Your HR Meetup Poster</h2>
+
+        <label>Upload your photo</label>
+        <input type="file" id="photoInput" accept="image/*">
+
+        <label>Your name</label>
+        <input type="text" id="nameInput"
+               placeholder="Enter your name">
+
+        <label>Your bio / designation</label>
+        <textarea id="bioInput" rows="3"
+                  placeholder="Designation, company or short bio"></textarea>
+
+        <button onclick="window.print()">Download Poster / Save as PDF</button>
+    </div>
+
+    <div class="poster" id="poster">
+        <img class="template" src="attending.png" alt="HR Meetup template">
+
+        <img class="speaker-photo" id="speakerPhoto" alt="Speaker photo">
+
+        <div class="speaker-info">
+            <h2 class="speaker-name" id="speakerName"></h2>
+            <p class="speaker-bio" id="speakerBio"></p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const photoInput = document.getElementById("photoInput");
+const speakerPhoto = document.getElementById("speakerPhoto");
+const nameInput = document.getElementById("nameInput");
+const bioInput = document.getElementById("bioInput");
+
+photoInput.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (file && file.type.startsWith("image/")) {
+        speakerPhoto.src = URL.createObjectURL(file);
+        speakerPhoto.style.display = "block";
+    }
+});
+
+nameInput.addEventListener("input", function () {
+    document.getElementById("speakerName").textContent = this.value;
+});
+
+bioInput.addEventListener("input", function () {
+    document.getElementById("speakerBio").textContent = this.value;
+});
+</script>
+</body>
+</html>
